@@ -41,6 +41,10 @@ def lambda_handler(event, context):
             event_name = s3_record["eventName"]
             object_key = s3_record["s3"]["object"]["key"]
 
+            # Skip non-data files like plot.png
+            if object_key == "plot.png":
+                continue
+
             if event_name.startswith("ObjectCreated"):
                 size = s3_record["s3"]["object"]["size"]
                 log_entry = {

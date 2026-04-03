@@ -81,17 +81,16 @@ class InfraStack(Stack):
 
         # ── Logging Lambda ──
         logging_log_group = logs.LogGroup(self, "LoggingLogGroup",
-            log_group_name="/aws/lambda/Assignment4LoggingLambda",
             removal_policy=RemovalPolicy.DESTROY,
             retention=logs.RetentionDays.ONE_WEEK,
         )
 
         logging_lambda = _lambda.Function(self, "LoggingLambda",
-            function_name="Assignment4LoggingLambda",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="logging_lambda.lambda_handler",
             code=_lambda.Code.from_asset("lambda"),
             timeout=Duration.seconds(30),
+            log_group=logging_log_group,
             environment={
                 "LOG_GROUP_NAME": logging_log_group.log_group_name,
             },
