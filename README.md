@@ -1,58 +1,67 @@
+# s3-size-tracker-fanout-cdk
 
-# Welcome to your CDK Python project!
+S3 bucket size tracker with SNS/SQS fanout, CloudWatch alarm, and auto-cleanup.
 
-This is a blank project for CDK development with Python.
+Built with AWS CDK (Python).
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## What it does
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+S3 events go through SNS → SQS fanout to two consumers:
+- **Size-tracking lambda** — records bucket size to DynamoDB over time
+- **Logging lambda** — logs object size changes to CloudWatch
 
-To manually create a virtualenv on MacOS and Linux:
+A CloudWatch metric filter watches the logs. When total size exceeds the threshold, an alarm triggers a cleaner lambda that deletes the largest object.
 
+A plotting lambda generates a chart of bucket size over time.
+
+## Setup
+
+Install CDK CLI (if you don't have it):
 ```
-$ python -m venv .venv
-```
-
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
-$ source .venv/bin/activate
+npm install -g aws-cdk
 ```
 
-If you are a Windows platform, you would activate the virtualenv like this:
-
+Create venv and install deps:
 ```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
+python -m venv .venv
 ```
 
-At this point you can now synthesize the CloudFormation template for this code.
+Activate it:
+```
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
+
+Install requirements:
+```
+pip install -r requirements.txt
+```
+
+Check everything works:
+```
+cdk synth
+```
+
+## Deploy
 
 ```
-$ cdk synth
+cdk deploy --all
 ```
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `requirements.txt` file and rerun the `python -m pip install -r requirements.txt`
-command.
+## How to run
 
-## Useful commands
+1. Open AWS Lambda console
+2. Find DriverLambda (in ApiStack)
+3. Invoke with test event `{}`
+4. Wait ~5 min (there are sleeps between operations)
+5. Download `plot.png` from the S3 bucket to see the result
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+## Clean up
 
-Enjoy!
+```
+cdk destroy --all
+```
+
+## Note on CloudWatch SUM
+
+The second alarm may not fire because CloudWatch SUM only aggregates within a single evaluation period (60s). If two events land in different periods, they don't get summed together. This is a known CloudWatch limitation.
