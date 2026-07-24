@@ -55,7 +55,7 @@ cdk destroy --all   # teardown
 
 ## Structure
 
-```
+```bash
 app.py                                # CDK entry point
 s3_size_tracker_fanout_cdk/
   infra_stack.py                      # bucket, table, SNS/SQS, 4 lambdas, metric filter, alarm
