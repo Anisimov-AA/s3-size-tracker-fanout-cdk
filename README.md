@@ -56,16 +56,16 @@ cdk destroy --all   # teardown
 ## Structure
 
 ```
-app.py                                CDK entry point
+app.py                                # CDK entry point
 s3_size_tracker_fanout_cdk/
-  infra_stack.py                      bucket, table, SNS/SQS, 4 lambdas, metric filter, alarm
-  api_stack.py                        API Gateway + driver lambda
-lambda/                               all lambdas share this dir; handler picks the file
-  driver.py                           demo orchestrator (puts files, calls API)
-  size_tracking.py                    writes size history to DynamoDB
-  logging_lambda.py                   logs size deltas to CloudWatch
-  cleaner.py                          deletes largest object on alarm
-  plotting.py                         renders chart, uploads plot.png
+  infra_stack.py                      # bucket, table, SNS/SQS, 4 lambdas, metric filter, alarm
+  api_stack.py                        # API Gateway + driver lambda
+lambda/                               # all lambdas share this dir; handler picks the file
+  driver.py                           # demo orchestrator (puts files, calls API)
+  size_tracking.py                    # writes size history to DynamoDB
+  logging_lambda.py                   # logs size deltas to CloudWatch
+  cleaner.py                          # deletes largest object on alarm
+  plotting.py                         # renders chart, uploads plot.png
 ```
 
 ## Gotchas
